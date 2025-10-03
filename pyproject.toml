@@ -1,0 +1,17 @@
+[project]
+name = "portfolio-mgmt"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+lint = [
+    "pre-commit>=4.3.0",
+    "ruff>=0.13.3",
+]
+
+all = [
+    { include-group = "lint" },
+]
