@@ -1,0 +1,6 @@
+isin,fundName,fundSize,inceptionDate,ter,ticker,index,asset_class,grouping,returns_5y,holdings,category
+IE0006WW1TQ4,Xtrackers MSCI World ex USA UCITS ETF 1C,1392.0,06.03.24,0.0015,EXUS,MSCI World ex USA,Equity,World,0.0,765.0,Equity World
+IE00B3F81409,iShares Core Global Aggregate Bond UCITS ETF USD (Dist),1524.0,21.11.17,0.001,EUNU,Bloomberg Global Aggregate Bond,Bonds,"World, Aggregate, All maturities",-0.0948,17173.0,Bonds Aggregate World
+IE00B5BMR087,iShares Core S&P 500 UCITS ETF USD (Acc),88378.0,19.05.10,0.0007,SXR8,S&P 500®,Equity,United States,1.0227,504.0,Equity United States
+IE00B579F325,Invesco Physical Gold A,18495.0,25.06.09,0.0012,8PSG,Gold,Precious Metals,Gold,0.7653,,Precious Metals Gold
+IE00BTJRMP35,Xtrackers MSCI Emerging Markets UCITS ETF 1C,5081.0,21.06.17,0.0018,XMME,MSCI Emerging Markets,Equity,Emerging Markets,0.3774,1224.0,Equity Emerging Markets

@@ -58,7 +58,14 @@ unfixable = [
 
 # Per-file ignores
 [lint.per-file-ignores]
-"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"__init__.py" = [
+    "F401",  # Allow unused imports in __init__.py
+    "D104",  # Don't require docstring in init module
+]
+"tests/**" = [
+    "D",      # Don't require docstrings in tests
+    "N999",   # Allow invalid module names in tests
+]
 
 [lint.pydocstyle]
 convention = "google"

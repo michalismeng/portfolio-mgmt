@@ -1,10 +1,18 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "portfolio-mgmt"
-version = "0.1.0"
-description = "Add your description here"
+dynamic = ["version"]
+description = "Portfolio management tools"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "numpy>=2.3.3",
+    "pandas>=2.3.3",
+    "pyportfolioopt>=1.5.6",
+]
 
 [dependency-groups]
 lint = [
@@ -12,6 +20,27 @@ lint = [
     "ruff>=0.13.3",
 ]
 
+tests = [
+    "pytest>=8.4.2",
+]
+
 all = [
     { include-group = "lint" },
+    { include-group = "tests" },
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src"
+]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "node-and-date"
+fallback_version = "0.0.0"
+
+[project.scripts]
+portfolio-mgmt = "portfolio_mgmt.cli.main:main"
+
+[project.optional-dependencies]
+cli = ["fire>=0.7.1"]

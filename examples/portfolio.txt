@@ -1,0 +1,46 @@
+portfolio create "My Global Portfolio" manual
+
+node add Equities 0.8 Root
+node add Bonds 0.1 Root
+node add Alternatives 0.1 Root
+
+node add "Developed Markets" 0.9 Equities
+node add "Emerging Markets" 0.1 Equities
+
+node add "Global Bonds" 1 Bonds
+
+node add Gold 1 Alternatives
+
+node add USA 0.3 "Developed Markets"
+node add "World ex USA" 0.7 "Developed Markets"
+
+etf add SXR8 1 USA
+etf add EXUS 1 "World ex USA"
+etf add XMME 1 "Emerging Markets"
+etf add EUNU 1 "Global Bonds"
+etf add 8PSG 1 Gold
+
+portfolio view
+
+portfolio save test.json
+
+node info USA
+
+portfolio create "Test Optimization"
+
+node add Equities --parent Root
+node add Bonds --parent Root
+node add Alternatives --parent Root
+
+etf add SXR8 --parent Equities
+etf add EXUS --parent Equities
+etf add XMME --parent Equities
+etf add EUNU --parent Bonds
+etf add 8PSG --parent Alternatives
+
+portfolio view
+
+transaction create 8PSG 2025-09-10 10 250
+
+portfolio save test-optimization.json
+
