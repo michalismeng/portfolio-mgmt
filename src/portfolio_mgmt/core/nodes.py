@@ -184,10 +184,7 @@ class PortfolioNode:
         Returns:
             A series of the weekly returns of the node calculated as the weighted sum of the returns of its children.
         """
-        if ignore_empty:
-            weighted_returns = [w for w in self.children.returns() if w.any()]
-        else:
-            weighted_returns = self.children.returns()
+        weighted_returns = [w for w in self.children.returns() if w.any()] if ignore_empty else self.children.returns()
         weighted_returns = (pd.concat(weighted_returns, axis=1).dropna().sum(axis=1) if weighted_returns
                                                                                      else pd.Series(dtype=float))
         return weighted_returns
@@ -407,9 +404,8 @@ class PortfolioNode:
             "children": [child.to_dict(repr) for child in self.children]
         }
 
-        if repr == DictRepresentation.FULL:
-            if self.returns().any():
-                basic["risk_reward"] = self.risk_reward().to_dict()
+        if repr == DictRepresentation.FULL and self.returns().any():
+            basic["risk_reward"] = self.risk_reward().to_dict()
         return basic
 
     @staticmethod
@@ -421,7 +417,8 @@ class PortfolioNode:
             node = PortfolioNodeETF(ticker=data["ticker"], weight=data.get("weight"))
         else:
             valid_types = [m.value for m in NodeType]
-            raise ValueError(f"Unexpected portfolio node type '{data["type"]}'. Supported types are: {', '.join(valid_types)}")
+            raise ValueError(f"Unexpected portfolio node type '{data["type"]}'."
+                             f" Supported types are: {', '.join(valid_types)}")
 
         for child_data in data.get("children", []):
             node.add_child(PortfolioNode.from_dict(child_data))
@@ -453,6 +450,7 @@ class PortfolioNodeETF(PortfolioNode):
         return Etf.from_ticker(ticker)
 
     def is_leaf(self):
+        """Return whether the node is a leaf node."""
         return True
 
     def _set_countries(self, countries: pd.DataFrame):

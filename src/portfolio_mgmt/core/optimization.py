@@ -35,7 +35,7 @@ def optimize_formal(g_mu: list[float] | np.ndarray, stds: list[float] | np.ndarr
     weights, thus avoiding extreme weights to some extent.
 
     Args:
-        mu: A list of the geometric means of the returns of the ETFs.
+        g_mu: A list of the geometric means of the returns of the ETFs.
         stds: A list of the standard deviations of the returns of the ETFs.
         corr: A square correlation matrix of the returns of the ETFs.
 

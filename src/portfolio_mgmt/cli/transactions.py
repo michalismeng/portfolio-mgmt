@@ -1,5 +1,6 @@
-from dateutil.parser import parse
 from datetime import datetime
+
+from dateutil.parser import parse
 
 from ..core.transaction import Transaction
 from .utils import BaseCLI

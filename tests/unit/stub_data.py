@@ -33,7 +33,8 @@ def sample_prices():
     statistics. The fixture also includes a couple of inline sanity assertions that verify
     the mean and (sample) standard deviation of the series remain as expected.
     """
-    date_list = [PRICES_START_DATE + datetime.timedelta(weeks=x) for x in range((PRICES_END_DATE - PRICES_START_DATE).days // 7 + 1)]
+    date_list = [PRICES_START_DATE + datetime.timedelta(weeks=x)
+                 for x in range((PRICES_END_DATE - PRICES_START_DATE).days // 7 + 1)]
     df = pd.DataFrame(
         {"Close": PRICES},
         index=date_list,
@@ -72,7 +73,7 @@ def sample_etf_series(ticker: str):
         100,
         "Category",
     ]
-    s = pd.Series(dict(zip(keys, values)))
+    s = pd.Series(dict(zip(keys, values, strict=True)))
     s.name = f"ISIN-{ticker}"
     return s
 
@@ -94,8 +95,16 @@ class StubDataAccess(DataAccess):
 
     def __init__(self):
         # prices_df should be a DataFrame with a DateTimeIndex and a 'Close' column
-        self._prices = { TICKER: sample_prices(), TICKER_2: sample_prices() * 2, TICKER_3: sample_prices().drop(sample_prices().index[:2]) }
-        self._etf = { TICKER: sample_etf_series(TICKER), TICKER_2: sample_etf_series(TICKER_2), TICKER_3: sample_etf_series(TICKER_3) }
+        self._prices = {
+            TICKER: sample_prices(),
+            TICKER_2: sample_prices() * 2,
+            TICKER_3: sample_prices().drop(sample_prices().index[:2])
+        }
+        self._etf = {
+            TICKER: sample_etf_series(TICKER),
+            TICKER_2: sample_etf_series(TICKER_2),
+            TICKER_3: sample_etf_series(TICKER_3)
+        }
         self._countries = sample_countries()
 
     def get_etf_prices(self, ticker, align=True, smooth_spikes=True):

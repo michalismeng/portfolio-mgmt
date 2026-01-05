@@ -46,7 +46,8 @@ def test_prices_bounded():
         assert etf.prices.tolist() == PRICES[:-1]
         assert etf.last_price == PRICES[-2]
 
-    with Environment.use(Environment.clone(start_date=PRICES_START_DATE + datetime.timedelta(days=7), end_date=PRICES_END_DATE - datetime.timedelta(days=7))):
+    with Environment.use(Environment.clone(start_date=PRICES_START_DATE + datetime.timedelta(days=7),
+                                           end_date=PRICES_END_DATE - datetime.timedelta(days=7))):
         assert len(etf.prices) == len(PRICES) - 2
         assert etf.prices_start_date >= PRICES_START_DATE
         assert etf.prices_end_date <= PRICES_END_DATE
@@ -72,7 +73,8 @@ def test_returns_bounded():
         assert etf.returns.round(3).tolist() == RETURNS[:-1]
         assert etf.prices_end_date == PRICES_END_DATE - datetime.timedelta(days=7)
 
-    with Environment.use(Environment.clone(start_date=PRICES_START_DATE + datetime.timedelta(days=7), end_date=PRICES_END_DATE - datetime.timedelta(days=7))):
+    with Environment.use(Environment.clone(start_date=PRICES_START_DATE + datetime.timedelta(days=7),
+                                           end_date=PRICES_END_DATE - datetime.timedelta(days=7))):
         assert len(etf.returns) == len(RETURNS) - 2
         assert etf.returns.round(3).tolist() == RETURNS[1:-1]
         assert etf.prices_start_date == PRICES_START_DATE + datetime.timedelta(days=7)

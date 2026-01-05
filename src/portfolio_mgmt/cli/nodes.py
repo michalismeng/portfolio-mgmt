@@ -77,7 +77,7 @@ class NodeCommands(NodeCommandsBase):
             return
 
         if node.parent is None:
-            print(f"You cannot remove the root node from the portfolio.")
+            print("You cannot remove the root node from the portfolio.")
         else:
             node.parent.remove(node.name)
 

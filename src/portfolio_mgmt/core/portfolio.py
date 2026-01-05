@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pypfopt import DiscreteAllocation
 
-from portfolio_mgmt.core.etf import Etfs
+from portfolio_mgmt.core.etf import Etf, Etfs
 
 from .environment import Environment
 from .nodes import DictRepresentation, PortfolioNode, PortfolioNodeETF
@@ -244,6 +244,27 @@ class Portfolio:
             df = df[df["date"].dt.date <= env.end_date]
         return self._calculate_avg_base_price(df)
 
+    @property
+    def mvalue(self) -> float:
+        """Calculate the market value of the portfolio including cash."""
+        return self.market_value()["market_value"].sum()
+
+    @property
+    def cash(self) -> float:
+        """Calculate the current cash component of the portfolio.
+
+        The current amount of cash in the portfolio is calculated as the total amount
+        of cash added to the portfolio minus the cost basis of all non-cash related transactions.
+        """
+        consolidated_transactions = self.consolidate_transactions()
+        if self._CASH_TICKER not in consolidated_transactions.index:
+            cash_tx = 0
+        else:
+            cash_tx = consolidated_transactions.loc[self._CASH_TICKER, "cost_basis"]
+            consolidated_transactions.drop(self._CASH_TICKER, inplace=True)
+        return cash_tx - consolidated_transactions["cost_basis"].sum()
+
+
     def market_value(self):
         """Calculate the market value of each position in the portfolio.
 
@@ -274,16 +295,14 @@ class Portfolio:
         if not len(consolidated_transactions):
             return pd.DataFrame([], columns=self._MARKET_VALUE_COLUMNS).set_index("ticker")
 
-        etf_dict = {etf_node.ticker: etf_node.etf for etf_node in self._etf_nodes}
-
-        cash_tx = consolidated_transactions.loc[self._CASH_TICKER]
-        consolidated_transactions.drop(self._CASH_TICKER, inplace=True)
-        cash_component = cash_tx["cost_basis"] - consolidated_transactions["cost_basis"].sum()
+        cash_component = self.cash
+        consolidated_transactions.drop(self._CASH_TICKER, inplace=True, errors="ignore")
 
         mv_data = []
         for ticker, row in consolidated_transactions.iterrows():
-            last_price = etf_dict[str(ticker)].last_price
-            last_date = etf_dict[str(ticker)].prices_end_date
+            etf = Etf.from_ticker(str(ticker))
+            last_price = etf.last_price
+            last_date = etf.prices_end_date
             market_value = row["shares"] * last_price
             mv_data.append(
                 {
@@ -301,7 +320,7 @@ class Portfolio:
         # Add cash component as a separate entry (P&L is always 0 for cash)
         mv_data.append(
             {
-                "ticker": cash_tx.name,
+                "ticker": self._CASH_TICKER,
                 "date": max([item["date"] for item in mv_data])
                 if mv_data
                 else datetime.datetime.now().strftime("%Y-%m-%d"),

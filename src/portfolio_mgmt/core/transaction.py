@@ -1,8 +1,8 @@
 """Module for managing portfolio transactions."""
 from datetime import datetime
-from dateutil import parser
 
 import pandas as pd
+from dateutil import parser
 
 
 class Transaction:
