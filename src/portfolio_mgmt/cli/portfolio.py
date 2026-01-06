@@ -239,7 +239,7 @@ class PortfolioCommands(BaseCLI):
         if isinstance(when, str):
             when = self._str_to_datetime(when)
 
-        with self.active_portfolio_safe() as p, Environment.use(Environment.clone(end_date=when)):
+        with self.active_portfolio_safe() as p, Environment.use(Environment.clone(end_date=when.date() if when else None)):
             mv = p.market_value()
         self._print_market_value_info(mv, when)
 
@@ -250,7 +250,7 @@ class PortfolioCommands(BaseCLI):
         if isinstance(when, str):
             when = self._str_to_datetime(when)
 
-        with self.active_portfolio_safe() as p, Environment.use(Environment.clone(end_date=when)):
+        with self.active_portfolio_safe() as p, Environment.use(Environment.clone(end_date=when.date() if when else None)):
             buy_list, leftover = p.implement(amount)
         self._print_buy_list(buy_list, leftover, when)
 
@@ -261,6 +261,6 @@ class PortfolioCommands(BaseCLI):
             when = self._str_to_datetime(when)
 
         with self.active_portfolio_safe() as p:
-            with Environment.use(Environment.clone(end_date=when)):
+            with Environment.use(Environment.clone(end_date=when.date() if when else None)):
                 drift = p.drift()
             self._print_drift(drift, when, p)

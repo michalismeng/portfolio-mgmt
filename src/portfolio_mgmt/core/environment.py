@@ -4,6 +4,8 @@ The Environment class serves as a central place to store settings used throughou
 """
 import datetime
 from contextlib import contextmanager
+import hashlib
+import json
 
 from .data import DataAccess
 
@@ -141,3 +143,24 @@ class Environment:
         data_access = data_access if not isinstance(data_access, _MissingType) else current_env.data_access
 
         return Environment(start_date=start_date, end_date=end_date, data_access=data_access)
+
+    def state_hash(self) -> str:
+        payload = json.dumps(self.to_dict(), sort_keys=True, default=str)
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+    def to_dict(self) -> dict:
+        """Convert the Environment instance to a dictionary representation.
+
+        Returns:
+            dict: A dictionary containing the environment's attributes.
+        """
+        result = {
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "data_access": self.data_access.__name__ if self.data_access else None,
+        }
+
+        if any(k for k in vars(self) if k not in result):
+            raise ValueError("Environment has unknown attributes, cannot convert to dict.")
+
+        return result

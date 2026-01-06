@@ -9,6 +9,7 @@ description = "Portfolio management tools"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "cachetools>=6.2.4",
     "numpy>=2.3.3",
     "pandas>=2.3.3",
     "pyportfolioopt>=1.5.6",

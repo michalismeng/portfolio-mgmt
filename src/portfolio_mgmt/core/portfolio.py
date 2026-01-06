@@ -4,6 +4,8 @@ import datetime
 from enum import Enum
 from typing import Any
 
+from cachetools import cached
+from cachetools.keys import hashkey
 import numpy as np
 import pandas as pd
 from pypfopt import DiscreteAllocation
@@ -16,6 +18,8 @@ from .optimization import optimize_formal
 from .risk_reward import RiskReward
 from .transaction import Transactions
 
+import hashlib
+import json
 
 class OptimizationMethod(Enum):
     """The optimization method to use for the ETF weights of the portfolio."""
@@ -96,6 +100,10 @@ class Portfolio:
             "optimization_method": self.optimization_method.value,
             "transactions": self.transactions.to_tuple_list(),
         }
+
+    def state_hash(self) -> str:
+        payload = json.dumps(self.to_dict(), sort_keys=True, default=str)
+        return hashlib.sha256(payload.encode()).hexdigest()
 
     @classmethod
     def from_dict(cls, data: dict) -> "Portfolio":
@@ -264,7 +272,11 @@ class Portfolio:
             consolidated_transactions.drop(self._CASH_TICKER, inplace=True)
         return cash_tx - consolidated_transactions["cost_basis"].sum()
 
+    @staticmethod
+    def calculation_cache_key(p: 'Portfolio'):
+        return hashkey(p.state_hash(), Environment.current().state_hash())
 
+    @cached(cache={}, key=calculation_cache_key)
     def market_value(self):
         """Calculate the market value of each position in the portfolio.
 
@@ -340,6 +352,7 @@ class Portfolio:
 
         return pd.DataFrame(mv_data, columns=self._MARKET_VALUE_COLUMNS).set_index("ticker")
 
+    @cached(cache={}, key=calculation_cache_key)
     def implement(self, investment_amount: float | None = None) -> tuple[pd.DataFrame, Any]:
         """Implement the portfolio by calculating the discrete allocation of shares to buy.
 
@@ -393,6 +406,7 @@ class Portfolio:
 
         return pd.DataFrame(result, columns=self._PORTFOLIO_IMPLEMENT_COLUMNS).set_index("ticker"), leftover
 
+    @cached(cache={}, key=calculation_cache_key)
     def drift(self) -> pd.DataFrame:
         """Calculate the drift between the current holdings and the desired portfolio.
 
