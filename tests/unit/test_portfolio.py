@@ -30,7 +30,7 @@ def test_transaction_consolidation():
     assert len(consolidated) == 2  # Two tickers
 
     assert consolidated.loc[TICKER, "shares"] == 15
-    assert consolidated.loc[TICKER, "cost_basis"], 10 * BASE_PRICE + 5 * 2 * BASE_PRICE == 2
+    assert consolidated.loc[TICKER, "cost_basis"] == 10 * BASE_PRICE + 5 * 2 * BASE_PRICE
     assert round(consolidated.loc[TICKER, "avg_price"], 2) == round((10 * BASE_PRICE + 5 * 2 * BASE_PRICE) / 15, 2)
 
     assert consolidated.loc[TICKER_2, "shares"] == 8
@@ -119,10 +119,10 @@ def test_portfolio_transactions():
     assert portfolio.cash == initial_cash - 10 * BASE_PRICE + extra_cash
     assert portfolio.mvalue == portfolio.cash + PRICES[-1] * 10
 
-    # Sell position
+    # Sell position for double price
     portfolio.transactions.append(Transaction(TICKER, to_datetime(PRICES_END_DATE + relativedelta(days=2)), -10,
                                               2 * BASE_PRICE))
-    assert portfolio.cash == initial_cash + extra_cash
+    assert portfolio.cash == initial_cash + extra_cash + 10 * BASE_PRICE
 
 
 def test_short_sell_fails():

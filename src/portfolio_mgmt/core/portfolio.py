@@ -146,6 +146,7 @@ class Portfolio:
         for ticker, df in transactions.groupby("ticker"):
             total_shares = 0
             total_cost = 0.0
+            total_flow = 0.0
 
             for _, row in df.iterrows():
                 qty = row["quantity"]
@@ -153,6 +154,7 @@ class Portfolio:
 
                 if qty > 0:
                     total_cost += qty * price
+                    total_flow += qty * price
                     total_shares += qty
                 else:
                     sell_qty = -qty
@@ -161,16 +163,19 @@ class Portfolio:
 
                     avg_price = total_cost / total_shares
                     total_cost -= sell_qty * avg_price
+                    total_flow -= sell_qty * price
                     total_shares -= sell_qty
 
             avg_price = total_cost / total_shares if total_shares > 0 else 0.0
 
-            results.append({"ticker": ticker, "shares": total_shares, "cost_basis": total_cost, "avg_price": avg_price})
+            results.append({"ticker": ticker, "shares": total_shares, "cost_basis": total_cost, "avg_price": avg_price,
+                            "cashflow": total_flow})
 
         if results:
             return pd.DataFrame(results).set_index("ticker")
         else:
-            return pd.DataFrame(results, columns=["ticker", "shares", "cost_basis", "avg_price"]).set_index("ticker")
+            return (pd.DataFrame(results, columns=["ticker", "shares", "cost_basis", "avg_price", "cashflow"])
+                      .set_index("ticker"))
 
     @staticmethod
     def _compare_frames(df1: pd.DataFrame, df2: pd.DataFrame, key: str, value: str, value2: str | None = None):
@@ -262,15 +267,15 @@ class Portfolio:
         """Calculate the current cash component of the portfolio.
 
         The current amount of cash in the portfolio is calculated as the total amount
-        of cash added to the portfolio minus the cost basis of all non-cash related transactions.
+        of cash added to the portfolio minus the cost of all non-cash related transactions.
         """
         consolidated_transactions = self.consolidate_transactions()
         if self._CASH_TICKER not in consolidated_transactions.index:
             cash_tx = 0
         else:
-            cash_tx = consolidated_transactions.loc[self._CASH_TICKER, "cost_basis"]
+            cash_tx = consolidated_transactions.loc[self._CASH_TICKER, "cashflow"]
             consolidated_transactions.drop(self._CASH_TICKER, inplace=True)
-        return cash_tx - consolidated_transactions["cost_basis"].sum()
+        return cash_tx - consolidated_transactions["cashflow"].sum()
 
     @staticmethod
     def calculation_cache_key(p: 'Portfolio'):
@@ -448,8 +453,7 @@ class Portfolio:
 
         drift["mvalue_diff"] = drift["mvalue_diff"].abs()
 
-        cash_component = self.market_value().loc[self._CASH_TICKER]["market_value"].sum()
-        minimum_trade_value = max(150, cash_component * 0.1 / 100 if cash_component else 0)
+        minimum_trade_value = max(150, self.mvalue * 0.1 / 100)
 
         drift["outside_no_trade_zone"] = drift["weights_diff"].apply(lambda w: abs(w) > self.no_trade_zone / 2)
         drift["more_than_minimum_fee"] = drift["mvalue_diff"].apply(lambda mv: mv >= minimum_trade_value)
